@@ -1,0 +1,73 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+  }
+  
+  body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #E2EDF2; /* Warna oranye */
+  }
+  
+  .container {
+    background-color: #ecf0f1; /* Warna abu-abu terang untuk kotak */
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    width: 300px;
+  }
+  
+  .container img {
+    width: 100px;
+    height: 80px;
+    background-color: #E2EDF2; /* Warna oranye ikon */
+    /* border-radius: 50%; */
+    padding: 10px;
+  }
+  
+  h1 {
+    margin: 20px 0;
+    font-size: 24px;
+    color: #2c3e50;
+  }
+  
+  form input {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 5px;
+    border: 1px solid #bdc3c7;
+    background-color: #bdc3c7;
+  }
+  
+  form button {
+    width: 100%;
+    padding: 10px;
+    margin-top: 20px;
+    background-color: #3498db; /* Warna biru untuk tombol login */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  form button:hover {
+    background-color: #2980b9;
+  }
+  
+  a {
+    display: block;
+    margin-top: 20px;
+    text-decoration: none;
+    color: #4D6D7A; /* Warna merah untuk link */
+  }
+  
+  a:hover {
+    text-decoration: underline;
+  }
+  
