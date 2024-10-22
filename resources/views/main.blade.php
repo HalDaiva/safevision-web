@@ -35,7 +35,8 @@
             <section class="dashboard">
                 <div class="card">
                     <video id="video" autoplay playsinline></video>
-                    <div class="camera-status">Camera Non-Active</div> <!-- Elemen status di dalam kotak -->
+                    <div class="camera-status">Camera Non-Active</div> 
+                    <canvas id="canvas"></canvas>
                     <div class="card-content">
                         <h3>Living Room</h3>
                         <p>CAM2-LIVING</p>
