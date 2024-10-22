@@ -27,9 +27,7 @@
         </aside>
 
         <header class="header">
-            <div class="user-info">
-                Ikram Sabila
-            </div>
+            <div class="user-info">Nama</div>
         </header>
         <main class="main-content">
 
@@ -64,6 +62,7 @@
         </main>
     </div>
     <script src="{{ asset('js/main.js') }}"></script>
+    <script type="module" src="{{ asset('/js/firebase.js') }}"></script>
 </body>
 
 </html>

@@ -11,13 +11,15 @@
     <div class="container">
         <img src="{{ asset('images/logo.png') }}" alt="logo">
         <h1>Member Login</h1>
-        <form>
-            <input type="text" placeholder="User Name">
-            <input type="password" placeholder="Password">
-            <button>LOGIN</button>
+        <form id="loginForm">
+            <input type="email" id="email" placeholder="User Name" required>
+            <input type="password" id="password" placeholder="Password" required>
+            <button type="submit">LOGIN</button>
         </form>
         <a href="#">Forgot Password?</a>
     </div>
+
+    <script type="module" src="{{ asset('/js/firebase.js') }}"></script>
 </body>
 
 </html>

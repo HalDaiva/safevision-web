@@ -1,19 +1,19 @@
 body {
     font-family: Arial, sans-serif;
     background-color: #f8f9fa;
+    margin: 0px;
 }
 
-/* Styling untuk nav bar */
 nav {
     display: flex;
-    flex-direction: column; /* Mengubah flex ke kolom untuk vertikal */
-    align-items: flex-start; /* Menyelaraskan item ke kiri */
-    height: 100vh; /* Menyesuaikan tinggi nav dengan layar */
+    flex-direction: column; 
+    align-items: flex-start; 
+    height: 100vh; 
     background-color: #E2EDF2;
-    width: 200px; /* Mengatur lebar nav sesuai sidebar */
-    position: fixed; /* Membuat nav tetap di tempat */
+    width: 200px; 
+    position: fixed; 
     padding-top: 20px;
-    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1); /* Bayangan ke kanan */
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1); 
 }
 
 nav .logo {
@@ -31,9 +31,9 @@ nav .logo {
 }
 
 .nav-icon {
-    width: 24px; /* Sesuaikan ukuran gambar */
+    width: 24px; 
     height: 24px;
-    margin-right: 10px; /* Jarak antara gambar dan teks */
+    margin-right: 10px; 
 }
 
 nav ul {
@@ -62,8 +62,8 @@ nav ul li a {
 }
 
 nav ul li a:hover {
-    background-color: #4D6D7A; /* Warna background saat hover */
-    border-radius: 5px; /* Membuat ujung item menu melengkung */
+    background-color: #4D6D7A; 
+    border-radius: 5px; 
     color: white;
 }
 
@@ -90,9 +90,9 @@ nav ul li a:hover {
 
 .dashboard {
     display: flex;
-    gap: 20px; /* Jarak antar card */
-    justify-content: flex-start; /* Card rata ke kiri */
-    flex-wrap: wrap; /* Agar card bisa turun ke bawah jika lebar layar tidak cukup */
+    gap: 20px; 
+    justify-content: flex-start; 
+    flex-wrap: wrap; 
     margin: 20px;
 }
 
@@ -100,12 +100,12 @@ nav ul li a:hover {
     background-color: #E2EDF2;
     border-radius: 8px;
     padding: 10px;
-    width: 250px; /* Atur ukuran card */
+    width: 250px; 
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    position: relative; /* Tambahkan posisi relatif untuk kotak */
+    position: relative; 
 }
 
 .card img {
@@ -137,7 +137,7 @@ nav ul li a:hover {
 }
 
 .toggle.active {
-    background-color: #4D6D7A; /* Warna aktif */
+    background-color: #4D6D7A; 
 }
 
 .toggle:after {
@@ -164,15 +164,15 @@ nav ul li a:hover {
 }
 
 .camera-status {
-    position: absolute; /* Agar bisa ditempatkan di atas video */
-    top: 30%; /* Mengatur posisi vertikal ke tengah */
-    left: 50%; /* Jarak dari kiri */
-    transform: translate(-50%, -50%); /* Menggeser elemen setengah dari lebar dan tinggi untuk benar-benar berada di tengah */
-    color: white; /* Warna teks */
-    font-size: 16px; /* Ukuran font */
-    display: none; /* Sembunyikan secara default */
-    background: rgba(0, 0, 0, 0.7); /* Latar belakang semi-transparan */
-    padding: 5px; /* Jarak di dalam elemen */
-    border-radius: 5px; /* Ujung melengkung */
-    z-index: 1; /* Pastikan teks berada di atas video */
+    position: absolute; 
+    top: 30%; 
+    left: 50%; 
+    transform: translate(-50%, -50%); 
+    color: white; 
+    font-size: 16px; 
+    display: none;
+    background: rgba(0, 0, 0, 0.7); 
+    padding: 5px; 
+    border-radius: 5px; 
+    z-index: 1; 
 }

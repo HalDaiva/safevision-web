@@ -31,14 +31,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 cameraStatus.style.display = 'none'; 
             }
         } else {
-            video.srcObject = null; // Hentikan aliran video
-            cameraStatus.style.display = 'block'; // Tampilkan status saat kamera tidak aktif
+            video.srcObject = null; 
+            cameraStatus.style.display = 'block'; 
             if (stream) {
-                // Hentikan semua track video secara eksplisit
                 stream.getTracks().forEach(track => {
-                    track.stop(); // Stop each track, turning off the camera
+                    track.stop(); 
                 });
-                stream = null; // Kosongkan stream agar kamera benar-benar mati
+                stream = null; 
             }
         }
     });
