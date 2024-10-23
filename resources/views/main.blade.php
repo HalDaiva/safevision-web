@@ -16,10 +16,10 @@
                     <img src="{{ asset('images/logo.png') }}" alt="SafeVision Logo" width="100">
                 </div>
                 <ul>
-                    <li><a href="#">
+                    <li><a href="/main">
                             <img src="{{ asset('images/Logo-house.png') }}" alt="House Logo" class="nav-icon">
                             Dashboard</a></li>
-                    <li><a href="#">
+                    <li><a href="/database">
                             <img src="{{ asset('images/Logo-database.png') }}" alt="Database Logo" class="nav-icon">
                             Database</a></li>
                 </ul>
