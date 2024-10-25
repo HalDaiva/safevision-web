@@ -2,13 +2,15 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebas
 import {
     getAuth,
     signInWithEmailAndPassword,
-    onAuthStateChanged
+    onAuthStateChanged,
 } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
 import {
     getDatabase,
     ref,
-    get
-} from "https://www.gstatic.com/firebasejs/11.0.0/firebase-database.js"; 
+    get,
+    onValue,
+    remove,
+} from "https://www.gstatic.com/firebasejs/11.0.0/firebase-database.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyAag-kBJrvMgAuVEFyff0MmyAnmRjaK0Hs",
@@ -23,56 +25,101 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth();
-
-const loginForm = document.getElementById("loginForm");
-document.addEventListener("DOMContentLoaded", () => {
-    const loginForm = document.getElementById("loginForm");
-    loginForm.addEventListener("submit", (event) => {
-        event.preventDefault();
-
-        const email = document.getElementById("email").value;
-        const password = document.getElementById("password").value;
-
-        signInWithEmailAndPassword(auth, email, password)
-            .then((userCredential) => {
-                const user = userCredential.user;
-                window.location.href = "/main";
-                alert("Login successful!");
-            })
-            .catch((error) => {
-                const errorCode = error.code;
-                const errorMessage = error.message;
-                alert("Error: " + errorMessage);
-            });
-    });
-});
-
 const db = getDatabase(app);
 
-onAuthStateChanged(auth, (user) => {
-    if (user) {
-        const userId = user.uid;
-        const userRef = ref(db, "users/" + userId);
+document.addEventListener("DOMContentLoaded", () => {
+    const loginForm = document.getElementById("loginForm");
+    if (loginForm) {
+        loginForm.addEventListener("submit", (event) => {
+            event.preventDefault();
+            const email = document.getElementById("email").value;
+            const password = document.getElementById("password").value;
 
-        get(userRef)
-            .then((snapshot) => {
-                if (snapshot.exists()) {
-                    const userData = snapshot.val();
-                    const userName = userData.name;
+            signInWithEmailAndPassword(auth, email, password)
+                .then((userCredential) => {
+                    const user = userCredential.user;
+                    window.location.href = "/main";
+                    alert("Login successful!");
+                })
+                .catch((error) => {
+                    alert("Error: " + error.message);
+                });
+        });
+    }
 
-                    document.querySelector(
-                        ".user-info"
-                    ).textContent = `${userName}`;
-                } else {
-                    document.querySelector(
-                        ".user-info"
-                    ).textContent = `Please Initial Name!`;
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            const userId = user.uid;
+            const userRef = ref(db, "users/" + userId);
+            get(userRef)
+                .then((snapshot) => {
+                    if (snapshot.exists()) {
+                        const userData = snapshot.val();
+                        const userName = userData.name;
+                        document.querySelector(
+                            ".user-info"
+                        ).textContent = `${userName}`;
+                    } else {
+                        document.querySelector(
+                            ".user-info"
+                        ).textContent = `Please Initial Name!`;
+                    }
+                })
+                .catch((error) => console.error(error));
+        } else {
+            document.querySelector(".user-info").textContent =
+                "User not signed in";
+        }
+    });
+
+    const dataTable = document.getElementById("data-table");
+
+    function fetchData(callback) {
+        const usersRef = ref(db, "users");
+        onValue(usersRef, (snapshot) => {
+            const data = snapshot.val();
+            callback(data);
+        });
+    }
+
+    if (dataTable) {
+        fetchData((data) => {
+            for (const userId in data) {
+                const user = data[userId];
+                if (user.Video) {
+                    for (const videoId in user.Video) {
+                        const video = user.Video[videoId];
+                        const row = document.createElement("li");
+                        row.classList.add("table-row");
+                        row.innerHTML = `
+                            <div class="col col-1" data-label="Date">${video.timestamp}</div>
+                            <div class="col col-2" data-label="Camera">${video.Camera}</div>
+                            <div class="col col-3" data-label="Video Record"><a href="${video.video_url}" target="_blank">View Video</a></div>
+                            <div class="col col-4" data-label="Action"><button class="delete-btn" data-user-id="${userId}" data-video-id="${videoId}">Delete</button></div>
+                        `;
+                        dataTable.appendChild(row);
+                    }
                 }
-            })
-            .catch((error) => {
-                console.error(error);
-            });
+            }
+        });
+
+        dataTable.addEventListener("click", (event) => {
+            if (event.target.classList.contains("delete-btn")) {
+                const userId = event.target.getAttribute("data-user-id");
+                const videoId = event.target.getAttribute("data-video-id");
+                const videoRef = ref(db, `users/${userId}/Video/${videoId}`);
+
+                remove(videoRef)
+                    .then(() => {
+                        alert("Video deleted successfully!");
+                        event.target.closest(".table-row").remove();
+                    })
+                    .catch((error) =>
+                        console.error("Error removing document: ", error)
+                    );
+            }
+        });
     } else {
-        document.querySelector(".user-info").textContent = "User not signed in";
+        console.error("Element with ID 'data-table' not found.");
     }
 });
