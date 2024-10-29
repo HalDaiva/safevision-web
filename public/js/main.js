@@ -5,7 +5,13 @@ document.addEventListener("DOMContentLoaded", function () {
     const ctx = canvas.getContext("2d");
     let stream;
 
-    canvas.style.display = "none"
+    canvas.style.display = "none";
+
+    const pusher = new Pusher("910a56418d0cd8b33a61", {
+        cluster: "ap1",
+    });
+
+    const channel = pusher.subscribe("video-stream");
 
     function startCamera() {
         navigator.mediaDevices
@@ -14,13 +20,26 @@ document.addEventListener("DOMContentLoaded", function () {
                 stream = mediaStream;
                 video.srcObject = stream;
                 cameraStatus.style.display = "none";
-                video.style.display = "none"; 
+                video.style.display = "none";
                 canvas.style.display = "block";
                 captureFrame();
             })
             .catch(function (error) {
                 console.error("Error accessing the camera: ", error);
             });
+        const reader = new FileReader();
+            reader.onloadend = function () {
+                const imageUrl = reader.result;
+                channel.trigger("client-frame-captured", {
+                    image: imageUrl,
+                });
+            };
+    
+            if (blob instanceof Blob) {
+                reader.readAsDataURL(blob); 
+            } else {
+                console.error("Provided data is not of type Blob:", blob);
+            }
     }
 
     toggle.classList.remove("active");
@@ -37,7 +56,7 @@ document.addEventListener("DOMContentLoaded", function () {
             } else {
                 video.srcObject = stream;
                 cameraStatus.style.display = "none";
-                video.style.display = "none"; 
+                video.style.display = "none";
                 canvas.style.display = "block";
             }
         } else {
@@ -80,7 +99,7 @@ document.addEventListener("DOMContentLoaded", function () {
             })
             .catch((error) => {
                 console.error("Error sending frame to Flask API: ", error);
-            });
+            });    
     }
 
     function handleDetections(detections) {
@@ -88,24 +107,24 @@ document.addEventListener("DOMContentLoaded", function () {
             console.error("No detections received.");
             return;
         }
-    
+
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-    
+
         detections.forEach((detection) => {
             const { label, confidence, bbox } = detection;
             const [x, y, width, height] = bbox;
-    
+
             if (label === "Human") {
-                ctx.strokeStyle = "red"; 
+                ctx.strokeStyle = "red";
             } else {
-                ctx.strokeStyle = "green"; 
+                ctx.strokeStyle = "green";
             }
-    
+
             ctx.lineWidth = 2;
             ctx.strokeRect(x, y, width, height);
-    
-            ctx.fillStyle = ctx.strokeStyle; 
+
+            ctx.fillStyle = ctx.strokeStyle;
             ctx.font = "16px Arial";
             ctx.fillText(
                 `${label} (${(confidence * 100).toFixed(2)}%)`,
@@ -113,5 +132,28 @@ document.addEventListener("DOMContentLoaded", function () {
                 y > 10 ? y - 5 : 10
             );
         });
+
+        canvas.toBlob(function (blob) {
+            sendToPusher(blob);
+        }, "image/jpeg");
+    }
+
+    function sendToPusher(blob) {
+        const reader = new FileReader();
+        reader.onloadend = function () {
+            const imageUrl = reader.result;
+
+            // console.log("URL Pusher:", imageUrl);
+
+            channel.trigger("client-frame-captured", {
+                image: imageUrl,
+            });
+        };
+
+        if (blob instanceof Blob) {
+            reader.readAsDataURL(blob);
+        } else {
+            console.error("Provided data is not of type Blob:", blob);
+        }
     }
 });

@@ -64,6 +64,7 @@
     </div>
     <script src="{{ asset('js/main.js') }}"></script>
     <script type="module" src="{{ asset('/js/firebase.js') }}"></script>
+    <script src="https://js.pusher.com/7.0/pusher.min.js"></script>
 </body>
 
 </html>
