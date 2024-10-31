@@ -1,5 +1,6 @@
 <?php
 
+use App\Events\FrameCaptured;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\VideoStreamController;
 
@@ -17,3 +18,9 @@ Route::get('/database', function () {
 });
 
 Route::post('/handle-frame', [VideoStreamController::class, 'handleFrameCaptured']);
+
+Route::get('/trigger-event', function () {
+    $message = "This is a test message!";
+    broadcast(new FrameCaptured($message));
+    return "Event has been triggered!";
+});

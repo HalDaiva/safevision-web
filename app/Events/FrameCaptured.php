@@ -14,20 +14,23 @@ class FrameCaptured implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    public $image;
+    public $message;
 
-    public function __construct($image)
+
+    public function __construct($message)
     {
-        $this->image = $image;
+        $this->message = $message;
+        \Log::info('FrameCaptured event created with image: ' . $message);
     }
 
     public function broadcastOn()
     {
-        return new Channel('video-stream'); 
+        return new Channel('video-stream'); //channel
+//        return ['video-stream']; //channel
     }
 
     public function broadcastAs()
     {
-        return 'client-frame-captured';
+        return 'client-frame-captured'; //event
     }
 }

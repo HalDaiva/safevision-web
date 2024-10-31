@@ -2,13 +2,13 @@ document.addEventListener("DOMContentLoaded", function () {
     const video = document.getElementById("video");
     const toggle = document.querySelector(".toggle");
     const cameraStatus = document.querySelector(".camera-status");
-    const canvas = document.getElementById("canvas"); 
+    const canvas = document.getElementById("canvas");
     const ctx = canvas.getContext("2d");
     let stream;
 
     canvas.style.display = "none";
 
-    const pusher = new Pusher("910a56418d0cd8b33a61", {
+    var pusher = new Pusher("c1da5e3f9f0c274c3068", {
         cluster: "ap1",
     });
 
@@ -66,8 +66,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
             canvas.toBlob(function (blob) {
                 sendFrame(blob);
-                sendToPusher(blob); 
-            }, "image/jpeg");
+                sendToPusher(blob);
+            }, "image/jpeg", 0.25);
         }
         setTimeout(captureFrame, 500);
     }
@@ -131,7 +131,10 @@ document.addEventListener("DOMContentLoaded", function () {
                 body: JSON.stringify({ image: imageUrl }),
             })
                 .then((response) => response.json())
-                .then((data) => console.log("Event terkirim ke server:", data))
+                .then((data) => {
+                    console.log("Event terkirim ke server:", data);
+                    pusher.trigger("video-stream", "client-frame-captured", "hello world");
+                })
                 .catch((error) =>
                     console.error("Error mengirim gambar:", error)
                 );
@@ -142,9 +145,17 @@ document.addEventListener("DOMContentLoaded", function () {
         } else {
             console.error("Data yang dikirim bukan tipe Blob:", blob);
         }
+
+
+
+        // channel.bind("frame-captured", function (data) {
+        //     console.log("Event client-frame-captured diterima:", data.image);
+        // });
     }
 
-    channel.bind("client-frame-captured", function (data) {
-        console.log("Event client-frame-captured diterima:", data.image);
+    channel.bind('client-frame-captured', (data) => {
+        alert("test");
     });
+
+
 });

@@ -10,7 +10,7 @@
         "kreait/laravel-firebase": "^5.9",
         "laravel/framework": "^11.9",
         "laravel/tinker": "^2.9",
-        "pusher/pusher-php-server": "^7.2"
+        "pusher/pusher-php-server": "^7.0.2"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",

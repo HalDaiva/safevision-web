@@ -36,7 +36,7 @@
             <section class="dashboard">
                 <div class="card">
                     <video id="video" autoplay playsinline></video>
-                    <div class="camera-status">Camera Non-Active</div> 
+                    <div class="camera-status">Camera Non-Active</div>
                     <canvas id="canvas"></canvas>
                     <div class="card-content">
                         <h3>Living Room</h3>
@@ -63,9 +63,9 @@
             </section>
         </main>
     </div>
+    <script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
     <script src="{{ asset('js/main.js') }}"></script>
     <script type="module" src="{{ asset('/js/firebase.js') }}"></script>
-    <script src="https://js.pusher.com/7.0/pusher.min.js"></script>
 </body>
 
 </html>
