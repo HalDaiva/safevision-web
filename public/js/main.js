@@ -83,7 +83,9 @@ document.addEventListener("DOMContentLoaded", function () {
             });
     }
 
-    function handleDetections(detections) {
+    function handleDetections(response) {
+        const detections = response.detections;
+        
         if (!detections || detections.length === 0) {
             console.error("No detections received.");
             return;
@@ -96,16 +98,11 @@ document.addEventListener("DOMContentLoaded", function () {
             const { label, confidence, bbox } = detection;
             const [x, y, width, height] = bbox;
     
-            if (label === "Human") {
-                ctx.strokeStyle = "red"; 
-            } else {
-                ctx.strokeStyle = "green"; 
-            }
-    
+            ctx.strokeStyle = label === "Human" ? "red" : "green";
             ctx.lineWidth = 2;
             ctx.strokeRect(x, y, width, height);
     
-            ctx.fillStyle = ctx.strokeStyle; 
+            ctx.fillStyle = ctx.strokeStyle;
             ctx.font = "16px Arial";
             ctx.fillText(
                 `${label} (${(confidence * 100).toFixed(2)}%)`,
@@ -114,4 +111,5 @@ document.addEventListener("DOMContentLoaded", function () {
             );
         });
     }
+    
 });
