@@ -1,11 +1,22 @@
+
+import { sendToFirebase } from './firebase.js';
+
+
 document.addEventListener("DOMContentLoaded", function () {
     const video = document.getElementById("video");
     const toggle = document.querySelector(".toggle");
     const cameraStatus = document.querySelector(".camera-status");
+    const canvas = document.getElementById("canvas");
     const ctx = canvas.getContext("2d");
     let stream;
 
-    canvas.style.display = "none"
+    canvas.style.display = "none";
+
+    var pusher = new Pusher("c1da5e3f9f0c274c3068", {
+        cluster: "ap1",
+    });
+
+    const channel = pusher.subscribe("video-stream");
 
     function startCamera() {
         navigator.mediaDevices
@@ -14,7 +25,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 stream = mediaStream;
                 video.srcObject = stream;
                 cameraStatus.style.display = "none";
-                video.style.display = "none"; 
+                video.style.display = "none";
                 canvas.style.display = "block";
                 captureFrame();
             })
@@ -33,11 +44,10 @@ document.addEventListener("DOMContentLoaded", function () {
         if (this.classList.contains("active")) {
             if (!stream) {
                 startCamera();
-                captureFrame();
             } else {
                 video.srcObject = stream;
                 cameraStatus.style.display = "none";
-                video.style.display = "none"; 
+                video.style.display = "none";
                 canvas.style.display = "block";
             }
         } else {
@@ -59,11 +69,14 @@ document.addEventListener("DOMContentLoaded", function () {
             ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
             canvas.toBlob(function (blob) {
+                console.log("New Blob size: ", blob.size);  // This should print different sizes for different frames
                 sendFrame(blob);
-            }, "image/jpeg");
+                sendToFirebase(blob);
+            }, "image/jpeg", 0.25);
         }
-        setTimeout(captureFrame, 500);
+        setTimeout(captureFrame, 100);  // Capture frame every 500ms
     }
+
 
     function sendFrame(blob) {
         const formData = new FormData();
@@ -88,24 +101,18 @@ document.addEventListener("DOMContentLoaded", function () {
             console.error("No detections received.");
             return;
         }
-    
+
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-    
+
         detections.forEach((detection) => {
             const { label, confidence, bbox } = detection;
             const [x, y, width, height] = bbox;
-    
-            if (label === "Human") {
-                ctx.strokeStyle = "red"; 
-            } else {
-                ctx.strokeStyle = "green"; 
-            }
-    
+
+            ctx.strokeStyle = label === "Human" ? "red" : "green";
             ctx.lineWidth = 2;
             ctx.strokeRect(x, y, width, height);
-    
-            ctx.fillStyle = ctx.strokeStyle; 
+            ctx.fillStyle = ctx.strokeStyle;
             ctx.font = "16px Arial";
             ctx.fillText(
                 `${label} (${(confidence * 100).toFixed(2)}%)`,
@@ -114,4 +121,40 @@ document.addEventListener("DOMContentLoaded", function () {
             );
         });
     }
+
+    // function sendToFirebase(blob) {
+    //     const reader = new FileReader();
+    //     reader.onloadend = function () {
+    //         const imageUrl = reader.result;  // Convert the image to a base64 URL
+    //
+    //         // Firebase Realtime Database Reference
+    //         const userId = auth.currentUser ? auth.currentUser.uid : "guest";
+    //         const timestamp = new Date().toISOString();
+    //         const videoRef = ref(db, `users/${userId}/Video/${timestamp}`);
+    //
+    //         // Save the base64 image URL to Firebase Database
+    //         set(videoRef, {
+    //             timestamp: timestamp,
+    //             image: imageUrl,
+    //             camera: "Webcam"
+    //         }).then(() => {
+    //             console.log("Frame sent to Firebase successfully");
+    //         }).catch((error) => {
+    //             console.error("Error uploading frame to Firebase:", error);
+    //         });
+    //     };
+    //
+    //     if (blob instanceof Blob) {
+    //         reader.readAsDataURL(blob);  // Read the blob and convert it to base64
+    //     } else {
+    //         console.error("Data is not a Blob:", blob);
+    //     }
+    // }
+
+
+    channel.bind('client-frame-captured', (data) => {
+        alert("test");
+    });
+
+
 });

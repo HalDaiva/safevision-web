@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SafeVision Dashboard</title>
     <link rel="stylesheet" href="{{ asset('css/main.css') }}">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 </head>
 
 <body>
@@ -35,7 +36,7 @@
             <section class="dashboard">
                 <div class="card">
                     <video id="video" autoplay playsinline></video>
-                    <div class="camera-status">Camera Non-Active</div> 
+                    <div class="camera-status">Camera Non-Active</div>
                     <canvas id="canvas"></canvas>
                     <div class="card-content">
                         <h3>Living Room</h3>
@@ -62,8 +63,9 @@
             </section>
         </main>
     </div>
-    <script src="{{ asset('js/main.js') }}"></script>
+    <script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
     <script type="module" src="{{ asset('/js/firebase.js') }}"></script>
+    <script type="module" src="{{ asset('js/main.js') }}"></script>
 </body>
 
 </html>

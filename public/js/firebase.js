@@ -8,6 +8,7 @@ import {
     getDatabase,
     ref,
     get,
+    set,
     onValue,
     remove,
 } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-database.js";
@@ -123,3 +124,33 @@ document.addEventListener("DOMContentLoaded", () => {
         console.error("Element with ID 'data-table' not found.");
     }
 });
+
+export function sendToFirebase(blob) {
+    const reader = new FileReader();
+    reader.onloadend = function () {
+        const imageUrl = reader.result;  // Convert the image to a base64 URL
+
+        // Firebase Realtime Database Reference
+        const userId = auth.currentUser ? auth.currentUser.uid : "guest";
+        const timestamp = new Date().toISOString();
+        const videoRef = ref(db, `users/2dK2t8Zyg5RJloifZrIX1b9AOXQ2/Video`);
+
+        // Save the base64 image URL to Firebase Database
+        set(videoRef, {
+            timestamp: timestamp,
+            image: imageUrl,
+            camera: "cam1"
+        }).then(() => {
+            console.log("Frame sent to Firebase successfully");
+        }).catch((error) => {
+            console.error("Error uploading frame to Firebase:", error);
+        });
+    };
+
+    if (blob instanceof Blob) {
+        reader.readAsDataURL(blob);  // Read the blob and convert it to base64
+    } else {
+        console.error("Data is not a Blob:", blob);
+    }
+}
+
