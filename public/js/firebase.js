@@ -154,3 +154,27 @@ export function sendToFirebase(blob) {
     }
 }
 
+export function sendDetectionsToFirebase(detections) {
+    const firebaseData = {
+        detection: detections.map(detection => ({
+            bbox: detection.bbox,
+            confidence: detection.confidence,
+            label: detection.label
+        }))
+    };
+
+    // Use the modular Firebase functions to reference the path
+    const databaseRef = ref(db, `users/2dK2t8Zyg5RJloifZrIX1b9AOXQ2/Video`); // Reference to the user-specific path
+
+    // Using set to save the detection data
+    set(databaseRef, firebaseData)
+        .then(() => {
+            console.log("Detection data sent to Firebase Realtime Database successfully!");
+        })
+        .catch((error) => {
+            console.error("Error sending detection data to Firebase: ", error);
+        });
+}
+
+
+

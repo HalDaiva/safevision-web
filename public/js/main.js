@@ -1,6 +1,5 @@
-
 import { sendToFirebase } from './firebase.js';
-
+import { sendDetectionsToFirebase } from './firebase.js';
 
 document.addEventListener("DOMContentLoaded", function () {
     const video = document.getElementById("video");
@@ -10,13 +9,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const ctx = canvas.getContext("2d");
     let stream;
 
-    canvas.style.display = "none";
-
-    var pusher = new Pusher("c1da5e3f9f0c274c3068", {
-        cluster: "ap1",
-    });
-
-    const channel = pusher.subscribe("video-stream");
+    canvas.style.display = "none"
 
     function startCamera() {
         navigator.mediaDevices
@@ -44,6 +37,7 @@ document.addEventListener("DOMContentLoaded", function () {
         if (this.classList.contains("active")) {
             if (!stream) {
                 startCamera();
+                captureFrame();
             } else {
                 video.srcObject = stream;
                 cameraStatus.style.display = "none";
@@ -69,14 +63,12 @@ document.addEventListener("DOMContentLoaded", function () {
             ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
             canvas.toBlob(function (blob) {
-                console.log("New Blob size: ", blob.size);  // This should print different sizes for different frames
                 sendFrame(blob);
                 sendToFirebase(blob);
-            }, "image/jpeg", 0.25);
+            }, "image/jpeg");
         }
-        setTimeout(captureFrame, 100);  // Capture frame every 500ms
+        setTimeout(captureFrame, 500);
     }
-
 
     function sendFrame(blob) {
         const formData = new FormData();
@@ -90,13 +82,17 @@ document.addEventListener("DOMContentLoaded", function () {
             .then((data) => {
                 console.log("Data received from Flask:", data);
                 handleDetections(data);
+                // sendToFirebase(data.detections, data.processed_image);
             })
             .catch((error) => {
                 console.error("Error sending frame to Flask API: ", error);
             });
     }
 
-    function handleDetections(detections) {
+    function handleDetections(response) {
+        const detections = response.detections;
+        sendDetectionsToFirebase(detections);
+
         if (!detections || detections.length === 0) {
             console.error("No detections received.");
             return;
@@ -112,6 +108,7 @@ document.addEventListener("DOMContentLoaded", function () {
             ctx.strokeStyle = label === "Human" ? "red" : "green";
             ctx.lineWidth = 2;
             ctx.strokeRect(x, y, width, height);
+
             ctx.fillStyle = ctx.strokeStyle;
             ctx.font = "16px Arial";
             ctx.fillText(
@@ -121,40 +118,5 @@ document.addEventListener("DOMContentLoaded", function () {
             );
         });
     }
-
-    // function sendToFirebase(blob) {
-    //     const reader = new FileReader();
-    //     reader.onloadend = function () {
-    //         const imageUrl = reader.result;  // Convert the image to a base64 URL
-    //
-    //         // Firebase Realtime Database Reference
-    //         const userId = auth.currentUser ? auth.currentUser.uid : "guest";
-    //         const timestamp = new Date().toISOString();
-    //         const videoRef = ref(db, `users/${userId}/Video/${timestamp}`);
-    //
-    //         // Save the base64 image URL to Firebase Database
-    //         set(videoRef, {
-    //             timestamp: timestamp,
-    //             image: imageUrl,
-    //             camera: "Webcam"
-    //         }).then(() => {
-    //             console.log("Frame sent to Firebase successfully");
-    //         }).catch((error) => {
-    //             console.error("Error uploading frame to Firebase:", error);
-    //         });
-    //     };
-    //
-    //     if (blob instanceof Blob) {
-    //         reader.readAsDataURL(blob);  // Read the blob and convert it to base64
-    //     } else {
-    //         console.error("Data is not a Blob:", blob);
-    //     }
-    // }
-
-
-    channel.bind('client-frame-captured', (data) => {
-        alert("test");
-    });
-
 
 });
