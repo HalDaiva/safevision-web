@@ -1,5 +1,6 @@
-import { sendToFirebase } from './firebase.js';
-import { sendDetectionsToFirebase } from './firebase.js';
+import { sendToFirebase } from "./firebase.js";
+import { sendDetectionsToFirebase } from "./firebase.js";
+import { sendVideoToFirebase } from "./firebase.js";
 
 document.addEventListener("DOMContentLoaded", function () {
     const video = document.getElementById("video");
@@ -8,8 +9,12 @@ document.addEventListener("DOMContentLoaded", function () {
     const canvas = document.getElementById("canvas");
     const ctx = canvas.getContext("2d");
     let stream;
+    let recordedBlobs = [];
+    let isRecording = false;
+    let mediaRecorder;
+    let hasEmpty = false;
 
-    canvas.style.display = "none"
+    canvas.style.display = "none";
 
     function startCamera() {
         navigator.mediaDevices
@@ -21,6 +26,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 video.style.display = "none";
                 canvas.style.display = "block";
                 captureFrame();
+                startRecording();  // Mulai merekam saat kamera dimulai
             })
             .catch(function (error) {
                 console.error("Error accessing the camera: ", error);
@@ -45,6 +51,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 canvas.style.display = "block";
             }
         } else {
+            stopRecording(); // Hentikan perekaman saat toggle dimatikan
             video.srcObject = null;
             cameraStatus.style.display = "block";
             if (stream) {
@@ -55,6 +62,31 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         }
     });
+
+    function startRecording() {
+        recordedBlobs = [];
+        const options = { mimeType: "video/webm; codecs=vp8" };
+        mediaRecorder = new MediaRecorder(stream, options);
+
+        mediaRecorder.ondataavailable = handleDataAvailable;
+        mediaRecorder.start(10); // Mengirim data setiap 10ms
+        isRecording = true;
+        console.log("Recording started.");
+    }
+
+    function stopRecording() {
+        if (isRecording) {
+            mediaRecorder.stop();
+            isRecording = false;
+            console.log("Recording stopped.");
+        }
+    }
+
+    function handleDataAvailable(event) {
+        if (event.data.size > 0) {
+            recordedBlobs.push(event.data);
+        }
+    }
 
     function captureFrame() {
         if (video.srcObject) {
@@ -80,12 +112,10 @@ document.addEventListener("DOMContentLoaded", function () {
         })
             .then((response) => response.json())
             .then((data) => {
-                console.log("Data received from Flask:", data);
                 handleDetections(data);
-                // sendToFirebase(data.detections, data.processed_image);
             })
             .catch((error) => {
-                console.error("Error sending frame to Flask API: ", error);
+                // console.error("Error sending frame to Flask API: ", error);
             });
     }
 
@@ -94,12 +124,13 @@ document.addEventListener("DOMContentLoaded", function () {
         sendDetectionsToFirebase(detections);
 
         if (!detections || detections.length === 0) {
-            console.error("No detections received.");
+            // console.error("No detections received.");
             return;
         }
 
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        hasEmpty = false; // Reset status hasEmpty
 
         detections.forEach((detection) => {
             const { label, confidence, bbox } = detection;
@@ -116,7 +147,20 @@ document.addEventListener("DOMContentLoaded", function () {
                 x,
                 y > 10 ? y - 5 : 10
             );
+            if (label === "Empty") {
+                hasEmpty = true;
+                // console.log("ee");
+            }
         });
-    }
 
+        if (hasEmpty && isRecording) {
+            stopRecording(); // Hentikan perekaman jika terdeteksi 'Empty'
+            console.log("Uploading video to Firebase with recorded blobs:", recordedBlobs);
+            sendVideoToFirebase(recordedBlobs); // Kirim video ke Firebase
+            recordedBlobs = []; // Reset recorded blobs
+        } else if (!hasEmpty && !isRecording) {
+            startRecording(); // Mulai perekaman jika tidak terdeteksi 'Empty'
+            console.log("Recording started due to non-'Empty' detection.");
+        }
+    }
 });
