@@ -1,85 +1,162 @@
 body {
-    font-family: 'lato', sans-serif;
-  }
-  .container {
+   font-family: 'Roboto', sans-serif;
+}
+.container {
     max-width: 1100px;
     width: 100%;
     margin-right: auto;
     padding-left: 0px;
     padding-right: 25px;
     margin-left: 230px;
-    background-color: #E4EEF2;
+    background-color: #e4eef2;
     padding-top: 10px;
     padding-bottom: 20px;
     margin-top: 25px;
-  }
-  
-  h2 {
+}
+
+h2 {
     font-size: 26px;
     margin: 20px 0;
     text-align: center;
     small {
-      font-size: 0.5em;
+        font-size: 0.5em;
     }
-  }
-  
-  .responsive-table {
+}
+
+.col {
+    display: flex;
+    align-items: center; 
+    font-family: 'Roboto', sans-serif !important;
+    text-align: center;
+}
+
+.responsive-table {
     li {
-      border-radius: 3px;
-      padding: 20px 20px;
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 15px;
+        border-radius: 3px;
+        padding: 20px 20px;
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 15px;
     }
     .table-header {
-      background-color: #95A5A6;
-      font-size: 14px;
-      text-transform: uppercase;
-      letter-spacing: 0.03em;
-      margin-bottom: 30px;
+        background-color: #95a5a6;
+        font-size: 14px;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+        margin-bottom: 30px;
+        font-family: 'Roboto', sans-serif;
     }
     .table-row {
-      background-color: #ffffff;
-      box-shadow: 0px 0px 9px 0px rgba(0,0,0,0.1);
+        background-color: #ffffff;
+        box-shadow: 0px 0px 9px 0px rgba(0, 0, 0, 0.1);
+        font-family: 'Roboto', sans-serif;
     }
     .col-1 {
-      flex-basis: 30%;
+        flex-basis: 35%;
     }
     .col-2 {
-      flex-basis: 20%;
+        flex-basis: 15%;
     }
     .col-3 {
-      flex-basis: 25%;
+        flex-basis: 25%;
     }
     .col-4 {
-      flex-basis: 25%;
+        flex-basis: 25%;
     }
-    
+
     @media all and (max-width: 767px) {
-      .table-header {
-        display: none;
-      }
-      .table-row{
-        
-      }
-      li {
-        display: block;
-      }
-      .col {
-        
-        flex-basis: 100%;
-        
-      }
-      .col {
-        display: flex;
-        padding: 10px 0;
-        &:before {
-          color: #6C7A89;
-          padding-right: 10px;
-          content: attr(data-label);
-          flex-basis: 50%;
-          text-align: right;
+        .table-header {
+            display: none;
         }
-      }
+        li {
+            display: block;
+        }
+        .col {
+            flex-basis: 100%;
+        }
+        .col {
+            display: flex;
+            padding: 10px 0;
+            &:before {
+                color: #6c7a89;
+                padding-right: 10px;
+                content: attr(data-label);
+                flex-basis: 50%;
+                text-align: right;
+            }
+        }
     }
-  }
+}
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.8);
+}
+
+.close {
+    position: absolute;
+    top: 15px;
+    right: 25px;
+    color: #fff;
+    font-size: 30px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+#modalVideo {
+    display: block;
+    margin: 10% auto;
+    max-width: 100%;
+    max-height: 100%;
+    border-radius: 10px;
+}
+
+.b1 {
+  align-items: center;
+  appearance: none;
+  background-color: #3EB2FD;
+  background-image: linear-gradient(1deg, #4F58FD, #149BF3 99%);
+  background-size: calc(100% + 20px) calc(100% + 20px);
+  border-radius: 100px;
+  border-width: 0;
+  box-shadow: none;
+  box-sizing: border-box;
+  color: #FFFFFF;
+  cursor: pointer;
+  display: inline-flex;
+  font-family: CircularStd,sans-serif;
+  font-size: 1rem;
+  height: auto;
+  justify-content: center;
+  line-height: 1.5;
+  padding: 6px 20px;
+  position: relative;
+  text-align: center;
+  text-decoration: none;
+  transition: background-color .2s,background-position .2s;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  vertical-align: top;
+  white-space: nowrap;
+}
+
+.b1:active,
+.b1:focus {
+  outline: none;
+}
+
+.b1:hover {
+  background-position: -20px -20px;
+}
+
+.b1:focus:not(:active) {
+  box-shadow: rgba(40, 170, 255, 0.25) 0 0 0 .125em;
+}
+

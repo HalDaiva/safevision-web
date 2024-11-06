@@ -13,6 +13,7 @@ document.addEventListener("DOMContentLoaded", function () {
     let isRecording = false;
     let mediaRecorder;
     let hasEmpty = false;
+    let recordTimer; 
 
     canvas.style.display = "none";
 
@@ -26,7 +27,6 @@ document.addEventListener("DOMContentLoaded", function () {
                 video.style.display = "none";
                 canvas.style.display = "block";
                 captureFrame();
-                startRecording();  // Mulai merekam saat kamera dimulai
             })
             .catch(function (error) {
                 console.error("Error accessing the camera: ", error);
@@ -51,7 +51,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 canvas.style.display = "block";
             }
         } else {
-            stopRecording(); // Hentikan perekaman saat toggle dimatikan
+            stopRecordingSegment(); 
             video.srcObject = null;
             cameraStatus.style.display = "block";
             if (stream) {
@@ -63,22 +63,40 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
 
-    function startRecording() {
+    function startRecordingSegment() {
         recordedBlobs = [];
         const options = { mimeType: "video/webm; codecs=vp8" };
         mediaRecorder = new MediaRecorder(stream, options);
-
+    
         mediaRecorder.ondataavailable = handleDataAvailable;
-        mediaRecorder.start(10); // Mengirim data setiap 10ms
+        mediaRecorder.start(10); // Kirim data setiap 10ms
         isRecording = true;
         console.log("Recording started.");
+    
+        startSegmentTimer();
     }
+    
+    function startSegmentTimer() {
+        recordTimer = setTimeout(() => {
+            if (!hasEmpty) {
+                console.log("Continuing recording as 'Empty' was not detected.");
+                startSegmentTimer(); 
+            } else {
+                stopRecordingSegment(); 
+            }
+        }, 10000); 
+    }
+    
 
-    function stopRecording() {
+    function stopRecordingSegment() {
         if (isRecording) {
-            mediaRecorder.stop();
+            clearTimeout(recordTimer);
+            mediaRecorder.stop(); 
             isRecording = false;
             console.log("Recording stopped.");
+            console.log("Uploading video to Firebase with recorded blobs:", recordedBlobs);
+            sendVideoToFirebase(recordedBlobs); 
+            recordedBlobs = []; 
         }
     }
 
@@ -123,6 +141,8 @@ document.addEventListener("DOMContentLoaded", function () {
         const detections = response.detections;
         sendDetectionsToFirebase(detections);
 
+        hasEmpty = false;
+
         if (!detections || detections.length === 0) {
             // console.error("No detections received.");
             return;
@@ -149,17 +169,11 @@ document.addEventListener("DOMContentLoaded", function () {
             );
             if (label === "Empty") {
                 hasEmpty = true;
-                // console.log("ee");
             }
         });
 
-        if (hasEmpty && isRecording) {
-            stopRecording(); // Hentikan perekaman jika terdeteksi 'Empty'
-            console.log("Uploading video to Firebase with recorded blobs:", recordedBlobs);
-            sendVideoToFirebase(recordedBlobs); // Kirim video ke Firebase
-            recordedBlobs = []; // Reset recorded blobs
-        } else if (!hasEmpty && !isRecording) {
-            startRecording(); // Mulai perekaman jika tidak terdeteksi 'Empty'
+        if (!isRecording) {
+            startRecordingSegment(); 
             console.log("Recording started due to non-'Empty' detection.");
         }
     }

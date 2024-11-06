@@ -2,6 +2,7 @@ body {
     font-family: Arial, sans-serif;
     background-color: #f8f9fa;
     margin: 0px;
+    font-family: 'Roboto', sans-serif;
 }
 
 nav {
@@ -46,6 +47,7 @@ nav ul {
 nav ul li {
     width: 100%; 
     margin-bottom: 15px; 
+    vertical-align: middle;
 }
 
 nav ul li a {
@@ -81,6 +83,7 @@ nav ul li a:hover {
     padding-top: 30px;
     padding-bottom: 30px;
     background-color: #E2EDF2;
+    font-family: 'Roboto', sans-serif;
 }
 
 .main-content {
@@ -186,3 +189,4 @@ canvas {
     margin-right: auto;
     border-radius: 8px; 
 }
+

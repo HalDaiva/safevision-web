@@ -30,6 +30,9 @@
     const auth = getAuth();
     const db = getDatabase(app);
     const storage = getStorage(app);
+    const videoModal = document.getElementById("videoModal");
+    const modalVideo = document.getElementById("modalVideo");
+    const closeBtn = document.getElementsByClassName("close")[0];
 
 
     document.addEventListener("DOMContentLoaded", () => {
@@ -97,9 +100,9 @@
                             const row = document.createElement("li");
                             row.classList.add("table-row");
                             row.innerHTML = `
-                                <div class="col col-1" data-label="Date">${Record.Date}</div>
+                                <div class="col col-1" data-label="Date">${formatDate(Record.Date)}</div>
                                 <div class="col col-2" data-label="Camera">${Record.Camera}</div>
-                                <div class="col col-3" data-label="Video Record"><a href="${Record.Video}" target="_blank">View Video</a></div>
+                                <div class="col col-3" data-label="Video Record"><div class="play"><a href="${Record.Video}" target="_blank"><button class="b1" id="b1" type="button">Play Video</button></a></div></div>
                                 <div class="col col-4" data-label="Action"><button class="delete-btn" data-user-id="${userId}" data-video-id="${RecordId}">Delete</button></div>
                             `;
                             dataTable.appendChild(row);
@@ -109,10 +112,34 @@
             });
 
             dataTable.addEventListener("click", (event) => {
+                if (event.target.tagName === "BUTTON" && event.target.id === "b1") {
+                    event.preventDefault();
+
+                    const videoUrl = event.target.closest("a").getAttribute("href");
+                    modalVideo.src = videoUrl;
+                    videoModal.style.display = "block";
+                }
+            });
+
+            closeBtn.onclick == function() {
+                videoModal.style.display = "none";
+                modalVideo.onpause();
+                modalVideo.src = "";
+            };
+
+            window.onclick = function(event) {
+                if (event.target === videoModal) {
+                    videoModal.style.display = "none";
+                    modalVideo.onpause();
+                    modalVideo.src = "";
+                }
+            };
+
+            dataTable.addEventListener("click", (event) => {
                 if (event.target.classList.contains("delete-btn")) {
                     const userId = event.target.getAttribute("data-user-id");
                     const videoId = event.target.getAttribute("data-video-id");
-                    const videoRef = ref(db, `users/${userId}/Video/${videoId}`);
+                    const videoRef = ref(db, `users/${userId}/Record/${videoId}`);
 
                     remove(videoRef)
                         .then(() => {
@@ -128,6 +155,27 @@
             // console.error("Element with ID 'data-table' not found.");
         }
     });
+
+    function formatDate(isoString) {
+        const date = new Date(isoString);
+
+        const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thurday", "Friday", "Saturday"];
+        const months = [
+            "Januari", "Februari", "Maret", "April", "Mei", "Juni",
+            "Juli", "Agustus", "September", "Oktober", "November", "Desember"
+        ];
+
+        const day = days[date.getDay()];
+        const dayNum = String(date.getDate()).padStart(2, '0');
+        const month = months[date.getMonth()];
+        const year = date.getFullYear();
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        const seconds = String(date.getSeconds()).padStart(2, '0');
+        
+        return `${day}, ${dayNum} ${month} ${year}, \n${hours}:${minutes}:${seconds} WIB`; 
+
+    }
 
     export function sendToFirebase(blob) {
         const reader = new FileReader();
@@ -167,10 +215,8 @@
             }))
         };
 
-        // Use the modular Firebase functions to reference the path
         const databaseRef = ref(db, `users/im4Ine2p2ZMxTyrcGjDAas79xeS2/Video`); // Reference to the user-specific path
 
-        // Using set to save the detection data
         set(databaseRef, firebaseData)
             .then(() => {
                 // console.log("Detection data sent to Firebase Realtime Database successfully!");
