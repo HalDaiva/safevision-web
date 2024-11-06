@@ -29,7 +29,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 captureFrame();
             })
             .catch(function (error) {
-                console.error("Error accessing the camera: ", error);
+                console.error("Error accessing the camera: ", error);p
             });
     }
 
@@ -115,7 +115,7 @@ document.addEventListener("DOMContentLoaded", function () {
             canvas.toBlob(function (blob) {
                 sendFrame(blob);
                 sendToFirebase(blob);
-            }, "image/jpeg");
+            }, "image/jpeg", 0.2);
         }
         setTimeout(captureFrame, 500);
     }

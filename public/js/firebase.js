@@ -8,6 +8,7 @@
         getDatabase,
         ref,
         get,
+        update,
         set,
         onValue,
         remove,
@@ -172,8 +173,8 @@
         const hours = String(date.getHours()).padStart(2, '0');
         const minutes = String(date.getMinutes()).padStart(2, '0');
         const seconds = String(date.getSeconds()).padStart(2, '0');
-        
-        return `${day}, ${dayNum} ${month} ${year}, \n${hours}:${minutes}:${seconds} WIB`; 
+
+        return `${day}, ${dayNum} ${month} ${year}, \n${hours}:${minutes}:${seconds} WIB`;
 
     }
 
@@ -182,22 +183,22 @@
         reader.onloadend = function () {
             const imageUrl = reader.result;  // Convert the image to a base64 URL
 
-            // Firebase Realtime Database Reference
-            const userId = auth.currentUser ? auth.currentUser.uid : "guest";
-            const timestamp = new Date().toISOString();
-            const videoRef = ref(db, `users/im4Ine2p2ZMxTyrcGjDAas79xeS2/Video`);
+        // Firebase Realtime Database Reference
+        const userId = auth.currentUser ? auth.currentUser.uid : "guest";
+        const timestamp = new Date().toISOString();
+        const videoRef = ref(db, `users/` + auth.currentUser.uid + `/Video`);
 
-            // Save the base64 image URL to Firebase Database
-            set(videoRef, {
-                timestamp: timestamp,
-                image: imageUrl,
-                camera: "cam1"
-            }).then(() => {
-                // console.log("Frame sent to Firebase successfully");
-            }).catch((error) => {
-                // console.error("Error uploading frame to Firebase:", error);
-            });
-        };
+        // Update the base64 image URL and timestamp in Firebase Database
+        update(videoRef, {
+            timestamp: timestamp,
+            image: imageUrl,
+            camera: "cam1"
+        }).then(() => {
+            console.log("Frame sent to Firebase successfully");
+        }).catch((error) => {
+            console.error("Error uploading frame to Firebase:", error);
+        });
+    };
 
         if (blob instanceof Blob) {
             reader.readAsDataURL(blob);  // Read the blob and convert it to base64
@@ -215,7 +216,8 @@
             }))
         };
 
-        const databaseRef = ref(db, `users/im4Ine2p2ZMxTyrcGjDAas79xeS2/Video`); // Reference to the user-specific path
+    // Use the modular Firebase functions to reference the path
+    const databaseRef = ref(db, `users/` + auth.currentUser.uid + `/Video`); // Reference to the user-specific path
 
         set(databaseRef, firebaseData)
             .then(() => {
@@ -230,26 +232,26 @@
         const blob = new Blob(blobs, { type: "video/webm" });
         const videoPath = `Video-Capture/${new Date().toISOString()}.webm`;
         const storageReference = storageRef(storage, videoPath);
-    
+
         uploadBytes(storageReference, blob).then((snapshot) => {
             console.log("Uploaded a video file to Firebase Storage!");
-    
+
             getDownloadURL(snapshot.ref).then((downloadURL) => {
                 console.log("File available at", downloadURL);
-    
+
                 const videoData = {
                     Camera: "kamera 1",
                     Date: new Date().toISOString(),
                     Video: downloadURL,
                 };
-    
+
                 const userId = auth.currentUser ? auth.currentUser.uid : "guest"; // Get the current user ID
                 const videosRef = ref(db, `users/${userId}/Record`);
-    
+
                 get(videosRef)
                     .then((snapshot) => {
                         const nextIndex = snapshot.size || 0;
-                        
+
                         const indexRef = ref(db, `users/${userId}/Record/${nextIndex}`);
                         set(indexRef, videoData)
                             .then(() => {
@@ -262,4 +264,3 @@
             });
         }).catch((error) => console.error("Error uploading video to Firebase Storage:", error));
     }
-    
