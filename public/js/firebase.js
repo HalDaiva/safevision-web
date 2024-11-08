@@ -90,71 +90,113 @@
                 callback(data);
             });
         }
-
-        if (dataTable) {
-            fetchData((data) => {
-                for (const userId in data) {
-                    const user = data[userId];
-                    if (user.Record) {
-                        for (const RecordId in user.Record) {
-                            const Record = user.Record[RecordId];
-                            const row = document.createElement("li");
-                            row.classList.add("table-row");
-                            row.innerHTML = `
-                                <div class="col col-1" data-label="Date">${formatDate(Record.Date)}</div>
-                                <div class="col col-2" data-label="Camera">${Record.Camera}</div>
-                                <div class="col col-3" data-label="Video Record"><div class="play"><a href="${Record.Video}" target="_blank"><button class="b1" id="b1" type="button">Play Video</button></a></div></div>
-                                <div class="col col-4" data-label="Action"><button class="delete-btn" data-user-id="${userId}" data-video-id="${RecordId}">Delete</button></div>
-                            `;
-                            dataTable.appendChild(row);
+        
+        onAuthStateChanged(auth, (user) => {
+            if (dataTable) {
+                if (user) {
+                    const userId = user.uid;
+                    const userRecordsRef = ref(db, `users/${userId}/Record`);
+                    onValue(userRecordsRef, (snapshot) => {
+                        const data = snapshot.val();
+                        if (data) {
+                            dataTable.querySelectorAll(".table-row").forEach(row => row.remove());
+                            // dataTable.innerHTML = ''; 
+        
+                            const recordArray = Object.entries(data).map(([recordId, record]) => {
+                                return {
+                                    id: recordId,
+                                    ...record
+                                };
+                            }).sort((a, b) => new Date(b.Date) - new Date(a.Date));
+                            
+                            for (const record of recordArray) { 
+                                const row = document.createElement("li");
+                                row.classList.add("table-row");
+                                row.innerHTML = `
+                                    <div class="col col-1" data-label="Date">${formatDate(record.Date)}</div>
+                                    <div class="col col-2" data-label="Camera">${record.Camera}</div>
+                                    <div class="col col-3" data-label="Video Record">
+                                        <div class="play">
+                                            <a href="${record.Video}" target="_blank">
+                                                <button class="b1" id="b1" type="button">Play Video</button>
+                                            </a>
+                                        </div>
+                                    </div>
+                                    <div class="col col-4" data-label="Action">
+                                        <button class="delete-btn" data-user-id="${userId}" data-video-id="${record.id}">Delete</button>
+                                    </div>
+                                `;
+                                dataTable.appendChild(row);
+                            }
                         }
+                    });
+                }
+    
+                dataTable.addEventListener("click", (event) => {
+                    if (event.target.tagName === "BUTTON" && event.target.id === "b1") {
+                        event.preventDefault();
+    
+                        const videoUrl = event.target.closest("a").getAttribute("href");
+                        modalVideo.src = videoUrl;
+                        videoModal.style.display = "block";
                     }
-                }
-            });
-
-            dataTable.addEventListener("click", (event) => {
-                if (event.target.tagName === "BUTTON" && event.target.id === "b1") {
-                    event.preventDefault();
-
-                    const videoUrl = event.target.closest("a").getAttribute("href");
-                    modalVideo.src = videoUrl;
-                    videoModal.style.display = "block";
-                }
-            });
-
-            closeBtn.onclick == function() {
-                videoModal.style.display = "none";
-                modalVideo.onpause();
-                modalVideo.src = "";
-            };
-
-            window.onclick = function(event) {
-                if (event.target === videoModal) {
+                });
+    
+                closeBtn.onclick == function() {
                     videoModal.style.display = "none";
                     modalVideo.onpause();
                     modalVideo.src = "";
-                }
-            };
-
-            dataTable.addEventListener("click", (event) => {
-                if (event.target.classList.contains("delete-btn")) {
-                    const userId = event.target.getAttribute("data-user-id");
-                    const videoId = event.target.getAttribute("data-video-id");
-                    const videoRef = ref(db, `users/${userId}/Record/${videoId}`);
-
-                    remove(videoRef)
-                        .then(() => {
-                            // alert("Video deleted successfully!");
-                            event.target.closest(".table-row").remove();
-                        })
-                        .catch((error) =>
-                            console.error("Error removing document: ", error)
-                        );
-                }
-            });
-        } else {
-            // console.error("Element with ID 'data-table' not found.");
-        }
+                };
+    
+                window.onclick = function(event) {
+                    if (event.target === videoModal) {
+                        videoModal.style.display = "none";
+                        modalVideo.onpause();
+                        modalVideo.src = "";
+                    }
+                };
+    
+                dataTable.addEventListener("click", (event) => {
+                    if (event.target.classList.contains("delete-btn")) {
+                        const userId = event.target.getAttribute("data-user-id");
+                        const videoId = event.target.getAttribute("data-video-id");
+                        const videoRef = ref(db, `users/${userId}/Record/${videoId}`);
+                
+                        Swal.fire({
+                            title: "Are you sure?",
+                            text: "You won't be able to revert this!",
+                            icon: "warning",
+                            showCancelButton: true,
+                            confirmButtonColor: "#3085d6",
+                            cancelButtonColor: "#d33",
+                            confirmButtonText: "Yes, delete it!"
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                remove(videoRef)
+                                    .then(() => {
+                                        Swal.fire({
+                                            title: "Deleted!",
+                                            text: "Your file has been deleted.",
+                                            icon: "success"
+                                        });                
+                                        event.target.closest(".table-row").remove();
+                                    })
+                                    .catch((error) => {
+                                        console.error("Error removing document: ", error);
+                                        Swal.fire({
+                                            title: "Error!",
+                                            text: "There was an issue deleting the file.",
+                                            icon: "error"
+                                        });
+                                    });
+                            }
+                        });
+                    }
+                });
+            } else {
+                // console.error("Element with ID 'data-table' not found.");
+            }
+        });
     });
 
     function formatDate(isoString) {
@@ -181,14 +223,12 @@
     export function sendToFirebase(blob) {
         const reader = new FileReader();
         reader.onloadend = function () {
-            const imageUrl = reader.result;  // Convert the image to a base64 URL
+            const imageUrl = reader.result;  
 
-        // Firebase Realtime Database Reference
         const userId = auth.currentUser ? auth.currentUser.uid : "guest";
         const timestamp = new Date().toISOString();
         const videoRef = ref(db, `users/` + auth.currentUser.uid + `/Video`);
 
-        // Update the base64 image URL and timestamp in Firebase Database
         update(videoRef, {
             timestamp: timestamp,
             image: imageUrl,
@@ -201,10 +241,39 @@
     };
 
         if (blob instanceof Blob) {
-            reader.readAsDataURL(blob);  // Read the blob and convert it to base64
+            reader.readAsDataURL(blob);  
         } else {
             // console.error("Data is not a Blob:", blob);
         }
+    }
+
+    export function sendNotification(imageData, timestamp) {
+        const notificationRef = ref(db, `users/` + auth.currentUser.uid + `/Notification`);
+
+        get(notificationRef)
+            .then((snapshot) => {
+                let currentIndex = 0;
+                if (snapshot.exists()) {
+                    const currentData = snapshot.val();
+                    currentIndex = Object.keys(currentData).length;
+                }
+                
+                const notificationData = {
+                    Image: imageData,
+                    Timestamp: timestamp
+                };
+
+                update(notificationRef, {
+                    [currentIndex]: notificationData
+                }).then(() => {
+                    console.log('Notifikasi berhasil dikirim ke Firebase dengan indeks:', currentIndex);
+                }).catch((error) => {
+                    console.error('Gagal mengirim notifikasi ke Firebase:', error);
+                });
+            })
+            .catch((error) => {
+                console.error('Gagal mendapatkan data dari Firebase:', error);
+            });
     }
 
     export function sendDetectionsToFirebase(detections) {
@@ -216,8 +285,7 @@
             }))
         };
 
-    // Use the modular Firebase functions to reference the path
-    const databaseRef = ref(db, `users/` + auth.currentUser.uid + `/Video`); // Reference to the user-specific path
+    const databaseRef = ref(db, `users/` + auth.currentUser.uid + `/Video`); 
 
         set(databaseRef, firebaseData)
             .then(() => {

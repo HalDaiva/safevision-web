@@ -1,6 +1,7 @@
 import { sendToFirebase } from "./firebase.js";
 import { sendDetectionsToFirebase } from "./firebase.js";
 import { sendVideoToFirebase } from "./firebase.js";
+import { sendNotification  } from "./firebase.js";
 
 document.addEventListener("DOMContentLoaded", function () {
     const video = document.getElementById("video");
@@ -69,7 +70,7 @@ document.addEventListener("DOMContentLoaded", function () {
         mediaRecorder = new MediaRecorder(stream, options);
     
         mediaRecorder.ondataavailable = handleDataAvailable;
-        mediaRecorder.start(10); // Kirim data setiap 10ms
+        mediaRecorder.start(10);
         isRecording = true;
         console.log("Recording started.");
     
@@ -137,11 +138,26 @@ document.addEventListener("DOMContentLoaded", function () {
             });
     }
 
+    function captureCamera() {
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+        canvas.toBlob(function (blob) {
+            const reader = new FileReader();
+            reader.onloadend = function () {
+                const base64data = reader.result.split(',')[1]; 
+                sendNotification(base64data, new Date().toISOString());
+            };
+            reader.readAsDataURL(blob);
+        }, "image/jpeg", 0.2);
+    }
+
     function handleDetections(response) {
         const detections = response.detections;
         sendDetectionsToFirebase(detections);
 
-        hasEmpty = false;
+        hasEmpty = true;
 
         if (!detections || detections.length === 0) {
             // console.error("No detections received.");
@@ -150,7 +166,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-        hasEmpty = false; // Reset status hasEmpty
+        hasEmpty = false; 
 
         detections.forEach((detection) => {
             const { label, confidence, bbox } = detection;
@@ -169,12 +185,40 @@ document.addEventListener("DOMContentLoaded", function () {
             );
             if (label === "Empty") {
                 hasEmpty = true;
+                // console.log("Empty")
+            } else {
+                hasEmpty = false;
+                // console.log("Human")
             }
         });
 
-        if (!isRecording) {
-            startRecordingSegment(); 
-            console.log("Recording started due to non-'Empty' detection.");
+        let photoCapture = false;
+        let coolDown = false;
+
+        function resetCooldown() {
+            coolDown = false;
         }
+
+        if (hasEmpty) {
+            // console.log("No Record")
+        } else if (!hasEmpty) {
+            if (!isRecording) {
+                startRecordingSegment(); 
+                console.log("Recording started due to non-'Empty' detection.");
+                if (!photoCapture) {
+                    captureCamera();
+                    photoCapture = true;
+                    coolDown = true;
+                    console.log("Sudah")
+
+                    setTimeout(() => {
+                        photoCapture = false;
+                        resetCooldown();
+                        console.log("Sudah 1 menit");
+                    }, 60000);
+                }
+            }
+        }
+
     }
 });
