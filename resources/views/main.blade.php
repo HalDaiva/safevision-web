@@ -46,7 +46,7 @@
                     <div class="toggle"></div>
                 </div>
                 <div class="card">
-                    <img src="living-room.jpg" alt="Living Room" class="card-image">
+                    <img src="images/Garden.jpg" alt="Living Room" class="card-image">
                     <div class="card-content">
                         <h3>Living Room</h3>
                         <p>CAM2-LIVING</p>
@@ -54,7 +54,7 @@
                     <div class="toggle"></div>
                 </div>
                 <div class="card">
-                    <img src="living-room.jpg" alt="Living Room" class="card-image">
+                    <img src="images/Houses.webp" alt="Living Room" class="card-image">
                     <div class="card-content">
                         <h3>Living Room</h3>
                         <p>CAM2-LIVING</p>
