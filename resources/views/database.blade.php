@@ -7,7 +7,7 @@
 <link rel="stylesheet" href="{{ asset('css/database.css') }}">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap">
 <div class="container">
-    <h2>Responsive Tables Using LI</h2>
+    <h2>RECORD</h2>
     <ul class="responsive-table" id="data-table">
         <li class="table-header">
             <div class="col col-1">Date</div>

@@ -40,24 +40,24 @@
                     <div class="camera-status">Camera Non-Active</div>
                     <canvas id="canvas"></canvas>
                     <div class="card-content">
-                        <h3>Living Room</h3>
-                        <p>CAM2-LIVING</p>
+                        <h3>Backyard</h3>
+                        <p>CAM1-BACK</p>
                     </div>
                     <div class="toggle"></div>
                 </div>
                 <div class="card">
                     <img src="images/Garden.jpg" alt="Living Room" class="card-image">
                     <div class="card-content">
-                        <h3>Living Room</h3>
+                        <h3>Front Door</h3>
                         <p>CAM2-LIVING</p>
                     </div>
                     <div class="toggle"></div>
                 </div>
                 <div class="card">
-                    <img src="images/Houses.webp" alt="Living Room" class="card-image">
+                    <img src="images/Housess.jpeg" alt="Living Room" class="card-image">
                     <div class="card-content">
                         <h3>Living Room</h3>
-                        <p>CAM2-LIVING</p>
+                        <p>CAM3-LIVING</p>
                     </div>
                     <div class="toggle"></div>
                 </div>
